@@ -13,15 +13,27 @@ namespace Abacus.SyntaxTree
             this.tokens = tokens;
         }
 
-        public TokenTree TranslateFromRpn()
+        public CalculatorTree TranslateFromRpn()
         {
-            while (tokens.Count > 0)
+            if (tokens.Count > 0)
+                return null;
+            
+            CalculatorTree tree = new CalculatorTree(tokens[0]);
+            foreach (Token token in tokens)
             {
-                TokenTree tokenTree = new TokenTree(tokens[0]);
+                if (token is TokenNumber)
+                {
+                    if (tree.Key == null)
+                    {
+                        tree.Key = token;
+                        CalculatorTree newTree = new CalculatorTree(null,tree,null);
+                        tree = newTree;
+                    }
+                }
             }
         }
         
-        public TokenTree TranslateFromNormal()
+        public CalculatorTree TranslateFromArithmetic()
         {
             throw new NotImplementedException();
         }

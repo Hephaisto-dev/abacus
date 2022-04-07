@@ -26,7 +26,7 @@ namespace Abacus
             List<Token> tokens = Lexer.Lex(expression);
             
             Syntaxer syntaxer = new Syntaxer(tokens);
-            TokenTree tokenTree = isRpn ? syntaxer.TranslateFromRpn() : syntaxer.TranslateFromNormal();
+            CalculatorTree calculatorTree = isRpn ? syntaxer.TranslateFromRpn() : syntaxer.TranslateFromArithmetic();
             
             
             return 0;

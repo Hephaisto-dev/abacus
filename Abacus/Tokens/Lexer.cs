@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Abacus.Tokens
@@ -19,9 +20,21 @@ namespace Abacus.Tokens
 
                 int numericValue = (int)char.GetNumericValue(token);
                 if (numericValue != -1)
-                    tokens.Add(new TokenNumber(token));
+                {
+                    if (tokens.Count > 0 && tokens.Last() is TokenNumber)
+                    {
+                        TokenNumber last = (TokenNumber)tokens.Last();
+                        last.Concat(numericValue);
+                    }
+                    else
+                        tokens.Add(new TokenNumber(numericValue));
+                }
+                else 
+                    tokens.Add(new TokenEmpty());
             }
 
+            tokens.RemoveAll(token => token is TokenEmpty);
+            
             return tokens;
         }
 

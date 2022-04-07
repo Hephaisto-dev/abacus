@@ -11,5 +11,10 @@ namespace Abacus.Tokens
         {
             this.value = value;
         }
+
+        public void Concat(int token)
+        { 
+            value = value * 10 + token; 
+        }
     }
 }
