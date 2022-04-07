@@ -2,10 +2,14 @@ using System;
 
 namespace Abacus.Tokens
 {
-    public class TokenNumber : Token<int>
+    public class TokenNumber : Token
     {
-        protected TokenNumber(int value) : base(value)
+        private int value;
+
+        public int Value => value;
+        protected internal TokenNumber(int value)
         {
+            this.value = value;
         }
     }
 }

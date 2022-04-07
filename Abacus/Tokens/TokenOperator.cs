@@ -2,13 +2,20 @@ using System;
 
 namespace Abacus.Tokens
 {
-    public abstract class TokenOperator : Token<char>
+    public class TokenOperator : Token
     {
-        protected TokenOperator(char value) : base(value)
+
+        private char value;
+
+        public char Value => value;
+
+        private int priority;
+
+        protected internal TokenOperator(char value)
         {
+            this.value = value;
+            priority = GetPriority();
         }
-        
-        protected string AllowedChars => "∗÷/+-%^*";
 
         private double Compute(double lhs, double rhs)
         {
@@ -17,12 +24,26 @@ namespace Abacus.Tokens
                 case '*':
                 case '∗': return lhs * rhs;
                 case '÷':
-                case '/':
-                    return lhs / rhs;
+                case '/': return lhs / rhs;
                 case '+': return lhs + rhs;
                 case '-': return lhs - rhs;
                 case '%': return lhs % rhs;
                 case '^': return Math.Pow(lhs, rhs);
+            }
+
+            return 0;
+        }
+
+        private int GetPriority()
+        {
+            switch (Value)
+            {
+                case '*':
+                case '∗': return 1;
+                case '÷':
+                case '/': return 1;
+                case '%': return 1;
+                case '^': return 2;
             }
 
             return 0;

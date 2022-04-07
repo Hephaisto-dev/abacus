@@ -1,12 +1,7 @@
 namespace Abacus.Tokens
 {
-    public class Token<T>
+    public interface Token
     {
-        private T value;
-
-        public T Value => value;
-
-        protected Token(T value) =>
-            this.value = value;
+        
     }
 }
