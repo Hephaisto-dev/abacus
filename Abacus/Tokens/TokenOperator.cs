@@ -28,13 +28,15 @@ namespace Abacus.Tokens
                 case '+': return lhs + rhs;
                 case '-': return lhs - rhs;
                 case '%': return lhs % rhs;
-                case '^': return Math.Pow(lhs, rhs);
+                case '^':
+                    if (lhs == 0 && rhs < 0)
+                        throw new DivideByZeroException();
+                    return Math.Pow(lhs, rhs);
             }
-
             return 0;
         }
 
-        private int GetPriority()
+        public int GetPriority()
         {
             switch (Value)
             {

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Abacus.SyntaxTree;
+using System.Data;
+using System.Linq;
+using Abacus.Syntax;
 using Abacus.Tokens;
 
 namespace Abacus
@@ -19,20 +21,40 @@ namespace Abacus
 
         public int Run()
         {
-            if (!ParseArgs())
+            if (!CheckArgs())
                 return 1;
 
             string expression = Console.In.ReadToEnd();
-            List<Token> tokens = Lexer.Lex(expression);
-            
-            Syntaxer syntaxer = new Syntaxer(tokens);
-            CalculatorTree calculatorTree = isRpn ? syntaxer.TranslateFromRpn() : syntaxer.TranslateFromArithmetic();
-            
-            
+            Lexer lexer = new Lexer();
+            List<Token> tokens = new List<Token>();
+            try
+            {
+                tokens = lexer.Lex(expression, isRpn); //TODO check for errors
+            }
+            catch (SyntaxErrorException exception)
+            {
+                Console.Error.WriteLine(exception.Message);
+                return 2;
+            }
+
+            if (!isRpn)
+            {
+                try
+                {
+                    tokens = Syntaxer.ShuntingYard(tokens); //TODO check for errors
+                }
+                catch (InvalidOperationException exception)
+                {
+                    Console.Error.WriteLine(exception.Message);
+                    return 2;
+                }
+            }
+
+            Stack<Token> output = new Stack<Token>();
             return 0;
         }
 
-        private bool ParseArgs()
+        private bool CheckArgs()
         {
             if (args.Length > 1)
             {

@@ -4,17 +4,11 @@ namespace Abacus.Tokens
 {
     public class TokenNumber : Token
     {
-        private int value;
+        public int Value { get; }
 
-        public int Value => value;
         protected internal TokenNumber(int value)
         {
-            this.value = value;
-        }
-
-        public void Concat(int token)
-        { 
-            value = value * 10 + token; 
+            Value = value;
         }
     }
 }
