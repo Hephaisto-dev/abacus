@@ -43,12 +43,13 @@ namespace Abacus.Tokens
                             if (isRpn)
                                 throw new SyntaxErrorException("No function in RPN");
                             i = AddFunction(expression, i, tokens);
+                            tokens.Add(new TokenEmpty());
                         }
-                        else
+                        else if (char.IsNumber(token))
                         {
                             i = AddNumber(expression, i, tokens);
+                            tokens.Add(new TokenEmpty());
                         }
-                        tokens.Add(new TokenEmpty());
                         break;
                     }
                 }
@@ -72,22 +73,22 @@ namespace Abacus.Tokens
             ATokenFunction aTokenFunction = _functionManager.Functions.Find(function => function.CanonicalName.Equals(word));
             if (aTokenFunction != null)
                 tokens.Add(aTokenFunction);
-            return i;
+            return i-1;
         }
 
         private static int AddNumber(string expression, int i, List<Token> tokens)
         {
             int currentNumber = (int)char.GetNumericValue(expression[i]);
-            int number = currentNumber == -1 ? -1 : 0;
-            while (currentNumber != -1 && i + 1 < expression.Length)
+            int number = currentNumber;
+            i++;
+            while (i < expression.Length && char.IsNumber(expression[i]))
             {
+                currentNumber = (int)char.GetNumericValue(expression[i]);
                 number = number * 10 + currentNumber;
                 i++;
-                currentNumber = (int)char.GetNumericValue(expression[i]);
             }
-            if (number >= 0)
-                tokens.Add(new TokenNumber(number));
-            return i;
+            tokens.Add(new TokenNumber(number));
+            return i-1;
         }
 
         private static string Operators => "∗÷/+-%^*";

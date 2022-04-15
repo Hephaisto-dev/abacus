@@ -17,21 +17,21 @@ namespace Abacus.Tokens
             priority = GetPriority();
         }
 
-        private double Compute(double lhs, double rhs)
+        public int Compute(double lhs, double rhs)
         {
             switch (Value)
             {
                 case '*':
-                case '∗': return lhs * rhs;
+                case '∗': return (int) (lhs * rhs);
                 case '÷':
-                case '/': return lhs / rhs;
-                case '+': return lhs + rhs;
-                case '-': return lhs - rhs;
-                case '%': return lhs % rhs;
+                case '/': return (int) (lhs / rhs);
+                case '+': return (int) (lhs + rhs);
+                case '-': return (int) (lhs - rhs);
+                case '%': return (int) (lhs % rhs);
                 case '^':
                     if (lhs == 0 && rhs < 0)
                         throw new DivideByZeroException();
-                    return Math.Pow(lhs, rhs);
+                    return (int) Math.Pow(lhs, rhs);
             }
             return 0;
         }

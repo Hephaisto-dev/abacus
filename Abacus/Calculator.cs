@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using Abacus.Syntax;
 using Abacus.Tokens;
 
@@ -9,7 +8,7 @@ namespace Abacus
 {
     public class Calculator
     {
-        private bool isRpn;
+        private bool _isRpn;
 
         private const string AllowedArg = "--rpn";
         private string[] args;
@@ -21,54 +20,73 @@ namespace Abacus
 
         public int Run()
         {
-            if (!CheckArgs())
-                return 1;
+            /*if (!CheckArgs())
+                return 1;*/
 
-            string expression = Console.In.ReadToEnd();
-            Lexer lexer = new Lexer();
-            List<Token> tokens = new List<Token>();
             try
             {
-                tokens = lexer.Lex(expression, isRpn); //TODO check for errors
+                //string expression = Console.In.ReadToEnd();
+                string expression = "2 + 3";
+                Lexer lexer = new Lexer();
+                List<Token> tokens = lexer.Lex(expression, _isRpn);
+                
+                if (!_isRpn)
+                    tokens = Syntaxer.ShuntingYard(tokens);
+
+                Queue<Token> input = new Queue<Token>(tokens);
+                Stack<int> output = new Stack<int>();
+                while (input.Count != 0)
+                {
+                    Token dequeue = input.Dequeue();
+                    if (dequeue is TokenNumber @tokenNumber)
+                    {
+                        output.Push(tokenNumber.Value);
+                    }
+                    else if (dequeue is TokenOperator @tokenOperator)
+                    {
+                        int lhs = output.Pop();
+                        int rhs = output.Pop();
+                        output.Push(tokenOperator.Compute(lhs,rhs));
+                    }
+                    else if (dequeue is ATokenFunction)
+                    {
+                        //TODO
+                    }
+                }
+
+                Console.WriteLine(output.Peek());
+                return 0;
             }
-            catch (SyntaxErrorException exception)
+            catch (ArithmeticException exception)  //TODO check for errors
+            {
+                Console.Error.WriteLine(exception.Message);
+                return 3;
+            }
+            catch (SyntaxErrorException  exception)  //TODO check for errors
             {
                 Console.Error.WriteLine(exception.Message);
                 return 2;
             }
-
-            if (!isRpn)
+            catch (InvalidOperationException exception)
             {
-                try
-                {
-                    tokens = Syntaxer.ShuntingYard(tokens); //TODO check for errors
-                }
-                catch (InvalidOperationException exception)
-                {
-                    Console.Error.WriteLine(exception.Message);
-                    return 2;
-                }
+                Console.Error.WriteLine(exception.Message);
+                return 2;
             }
-
-            Stack<Token> output = new Stack<Token>();
-            return 0;
         }
 
         private bool CheckArgs()
         {
-            if (args.Length > 1)
+            switch (args.Length)
             {
-                Console.Error.WriteLine("Too much args");
-                return false;
-            }
-            if (args.Length == 1)
-            {
-                if (!args[0].Equals(AllowedArg))
-                {
+                case > 1:
+                    Console.Error.WriteLine("Too much args");
+                    return false;
+                case 1 when !args[0].Equals(AllowedArg):
                     Console.Error.WriteLine("Unknown Argument: " + args[0]);
                     return false;
-                }
-                isRpn = true;
+                case 1:
+                    _isRpn = true;
+                    break;
             }
 
             return true;
