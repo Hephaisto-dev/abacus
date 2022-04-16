@@ -1,6 +1,6 @@
 namespace Abacus.Tokens
 {
-    public class TokenSeparator : Token
+    public class TokenSeparator : IToken
     {
         
     }

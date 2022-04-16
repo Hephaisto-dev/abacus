@@ -1,6 +1,6 @@
 namespace Abacus.Tokens
 {
-    public interface Token
+    public class TokenLParenthesis : IToken
     {
         
     }

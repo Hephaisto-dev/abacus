@@ -5,14 +5,14 @@ using Abacus.Tokens.Functions;
 
 namespace Abacus.Syntax
 {
-    public class Syntaxer
+    public static class Syntaxer
     {
-        public static List<Token> ShuntingYard(List<Token> tokens)
+        public static List<IToken> ShuntingYard(List<IToken> tokens)
         {
-            Stack<Token> operatorStack = new Stack<Token>();
-            List<Token> output = new List<Token>();
+            Stack<IToken> operatorStack = new ();
+            List<IToken> output = new ();
 
-            foreach (Token token in tokens)
+            foreach (IToken token in tokens)
             {
                 switch (token)
                 {
@@ -33,8 +33,8 @@ namespace Abacus.Syntax
                     }
                     case TokenOperator @operator:
                     {
-                        while (operatorStack.Peek() is TokenOperator &&
-                               ((TokenOperator)operatorStack.Peek()).GetPriority() > @operator.GetPriority())
+                        while (operatorStack.Count > 0 && operatorStack.Peek() is TokenOperator &&
+                               ((TokenOperator)operatorStack.Peek()).Priority > @operator.Priority)
                         {
                             output.Add(operatorStack.Pop());
                         }
@@ -46,13 +46,12 @@ namespace Abacus.Syntax
                         break;
                     case TokenRParenthesis:
                     {
-                        operatorStack.Pop();
                         while (operatorStack.Peek() is not TokenLParenthesis)
                         {
                             output.Add(operatorStack.Pop());
                         }
                         operatorStack.Pop();
-                        if (operatorStack.Peek() is ATokenFunction)
+                        if (operatorStack.Count > 0 && operatorStack.Peek() is ATokenFunction)
                         {
                             output.Add(operatorStack.Pop());
                         }
@@ -62,7 +61,7 @@ namespace Abacus.Syntax
             }
             while (operatorStack.Count != 0)
             {
-                Token token = operatorStack.Pop();
+                IToken token = operatorStack.Pop();
                 if (token is TokenLParenthesis)
                     throw new InvalidOperationException("Syntax Error: Unbalanced parentheses");
                 output.Add(token);

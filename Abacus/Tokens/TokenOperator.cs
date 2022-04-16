@@ -2,19 +2,16 @@ using System;
 
 namespace Abacus.Tokens
 {
-    public class TokenOperator : Token
+    public class TokenOperator : IToken
     {
+        public char Value { get; }
 
-        private char value;
-
-        public char Value => value;
-
-        private int priority;
+        public int Priority { get; }
 
         protected internal TokenOperator(char value)
         {
-            this.value = value;
-            priority = GetPriority();
+            this.Value = value;
+            Priority = SetPriority();
         }
 
         public int Compute(double lhs, double rhs)
@@ -24,7 +21,10 @@ namespace Abacus.Tokens
                 case '*':
                 case '∗': return (int) (lhs * rhs);
                 case '÷':
-                case '/': return (int) (lhs / rhs);
+                case '/': 
+                    if (rhs == 0)
+                        throw new DivideByZeroException();
+                    return (int) (lhs / rhs);
                 case '+': return (int) (lhs + rhs);
                 case '-': return (int) (lhs - rhs);
                 case '%': return (int) (lhs % rhs);
@@ -36,7 +36,7 @@ namespace Abacus.Tokens
             return 0;
         }
 
-        public int GetPriority()
+        private int SetPriority()
         {
             switch (Value)
             {

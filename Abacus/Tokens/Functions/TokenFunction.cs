@@ -1,12 +1,12 @@
 using System;
 
-namespace Abacus.Tokens
+namespace Abacus.Tokens.Functions
 {
-    public class ATokenFunction<T> : ATokenFunction
+    public class TokenFunction<T> : ATokenFunction
     {
         private readonly Func<T,int> _computeFunction;
 
-        public ATokenFunction(string canonicalName, Func<T,int> func) : base(canonicalName)
+        public TokenFunction(string canonicalName, Func<T,int> func) : base(canonicalName)
         {
             _computeFunction = func;
         }

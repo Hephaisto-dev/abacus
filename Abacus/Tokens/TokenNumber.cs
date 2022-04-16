@@ -1,14 +1,9 @@
-using System;
-
 namespace Abacus.Tokens
 {
-    public class TokenNumber : Token
+    public class TokenNumber : ATokenValuable
     {
-        public int Value { get; }
-
-        protected internal TokenNumber(int value)
+        internal TokenNumber(int value) : base(value)
         {
-            Value = value;
         }
     }
 }

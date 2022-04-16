@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Abacus.Syntax;
 using Abacus.Tokens;
+using Abacus.Tokens.Functions;
 
 namespace Abacus
 {
@@ -11,50 +13,22 @@ namespace Abacus
         private bool _isRpn;
 
         private const string AllowedArg = "--rpn";
-        private string[] args;
+        private readonly string[] _args;
 
         public Calculator(string[] args)
         {
-            this.args = args;
+            this._args = args;
+            _isRpn = args.Contains(AllowedArg);
         }
 
-        public int Run()
+        public int Run(string expression)
         {
-            /*if (!CheckArgs())
-                return 1;*/
+            if (!CheckArgs())
+                return 1;
 
             try
             {
-                //string expression = Console.In.ReadToEnd();
-                string expression = "2 + 3";
-                Lexer lexer = new Lexer();
-                List<Token> tokens = lexer.Lex(expression, _isRpn);
-                
-                if (!_isRpn)
-                    tokens = Syntaxer.ShuntingYard(tokens);
-
-                Queue<Token> input = new Queue<Token>(tokens);
-                Stack<int> output = new Stack<int>();
-                while (input.Count != 0)
-                {
-                    Token dequeue = input.Dequeue();
-                    if (dequeue is TokenNumber @tokenNumber)
-                    {
-                        output.Push(tokenNumber.Value);
-                    }
-                    else if (dequeue is TokenOperator @tokenOperator)
-                    {
-                        int lhs = output.Pop();
-                        int rhs = output.Pop();
-                        output.Push(tokenOperator.Compute(lhs,rhs));
-                    }
-                    else if (dequeue is ATokenFunction)
-                    {
-                        //TODO
-                    }
-                }
-
-                Console.WriteLine(output.Peek());
+                Console.WriteLine(Calculate(expression));
                 return 0;
             }
             catch (ArithmeticException exception)  //TODO check for errors
@@ -74,19 +48,61 @@ namespace Abacus
             }
         }
 
+        public int Calculate(string expression)
+        {
+            Lexer lexer = new ();
+            List<IToken> tokens = lexer.Lex(expression, _isRpn);
+
+            if (!_isRpn)
+                tokens = Syntaxer.ShuntingYard(tokens);
+
+            
+            
+            Queue<IToken> input = new Queue<IToken>(tokens);
+            Stack<int> output = new Stack<int>();
+            while (input.Count != 0)
+            {
+                IToken dequeue = input.Dequeue();
+                if (dequeue is TokenNumber @tokenNumber)
+                {
+                    output.Push(tokenNumber.Value);
+                }
+                else if (dequeue is TokenOperator @tokenOperator)
+                {
+                    int rhs = output.Pop();
+                    int lhs = output.Pop();
+                    output.Push(tokenOperator.Compute(lhs,rhs));
+                }
+                else if (dequeue is ATokenFunction @atokenFunction)
+                {
+                    int param = output.Pop();
+                    switch (atokenFunction)
+                    {
+                        case TokenFunction<int> @function1:
+                            output.Push(function1.Compute(param));
+                            break;
+                        case TokenFunction<(int, int)> @function2:
+                            output.Push(function2.Compute((output.Pop(),param)));
+                            break;
+                    }
+                }
+            }
+
+            if (output.Count != 1)
+                throw new SyntaxErrorException("Syntax Error: operator expected");
+            return output.Pop();
+        }
+
         private bool CheckArgs()
         {
-            switch (args.Length)
+            switch (_args.Length)
             {
                 case > 1:
                     Console.Error.WriteLine("Too much args");
                     return false;
-                case 1 when !args[0].Equals(AllowedArg):
-                    Console.Error.WriteLine("Unknown Argument: " + args[0]);
+                case 1 when !_args[0].Equals(AllowedArg):
+                    Console.Error.WriteLine($"Unknown Argument: {_args[0]}");
                     return false;
-                case 1:
-                    _isRpn = true;
-                    break;
             }
 
             return true;

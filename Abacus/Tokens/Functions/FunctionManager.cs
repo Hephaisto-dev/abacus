@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Abacus.Tokens;
 
-namespace Abacus
+namespace Abacus.Tokens.Functions
 {
     public class FunctionManager
     {
@@ -10,12 +9,12 @@ namespace Abacus
         
         public FunctionManager()
         {
-            Functions.Add(new ATokenFunction<int>("sqrt",Sqrt));
-            Functions.Add(new ATokenFunction<(int,int)>("max",Max));
-            Functions.Add(new ATokenFunction<(int,int)>("min",Min));
-            Functions.Add(new ATokenFunction<int>("facto",Facto));
-            Functions.Add(new ATokenFunction<int>("isprime",IsPrime));
-            Functions.Add(new ATokenFunction<(int,int)>("gcd",Gcd));
+            Functions.Add(new TokenFunction<int>("sqrt",Sqrt));
+            Functions.Add(new TokenFunction<(int,int)>("max",Max));
+            Functions.Add(new TokenFunction<(int,int)>("min",Min));
+            Functions.Add(new TokenFunction<int>("facto",Facto));
+            Functions.Add(new TokenFunction<int>("isprime",IsPrime));
+            Functions.Add(new TokenFunction<(int,int)>("gcd",Gcd));
         }
 
         private static int Sqrt(int a)

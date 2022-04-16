@@ -1,6 +1,6 @@
 namespace Abacus.Tokens
 {
-    public abstract class ATokenFunction : Token
+    public abstract class ATokenFunction : IToken
     {
         protected ATokenFunction(string canonicalName)
         {

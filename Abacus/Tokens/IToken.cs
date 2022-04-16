@@ -1,6 +1,6 @@
 namespace Abacus.Tokens
 {
-    public class TokenEmpty : Token
+    public interface IToken
     {
         
     }

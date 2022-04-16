@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abacus", "Abacus\Abacus.csproj", "{0F969F8B-F38F-4A4F-8649-D90375913949}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{6F1AD7BB-2668-4EAC-8A64-041F95A08358}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{C72A95DA-14A1-47E8-AEA5-53901A9AFE3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,9 +14,9 @@ Global
 		{0F969F8B-F38F-4A4F-8649-D90375913949}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F969F8B-F38F-4A4F-8649-D90375913949}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F969F8B-F38F-4A4F-8649-D90375913949}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F1AD7BB-2668-4EAC-8A64-041F95A08358}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F1AD7BB-2668-4EAC-8A64-041F95A08358}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F1AD7BB-2668-4EAC-8A64-041F95A08358}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F1AD7BB-2668-4EAC-8A64-041F95A08358}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C72A95DA-14A1-47E8-AEA5-53901A9AFE3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C72A95DA-14A1-47E8-AEA5-53901A9AFE3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C72A95DA-14A1-47E8-AEA5-53901A9AFE3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C72A95DA-14A1-47E8-AEA5-53901A9AFE3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

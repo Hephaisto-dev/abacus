@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Data;
+using System.Linq;
 using Abacus.Tokens.Functions;
 
 namespace Abacus.Tokens
@@ -13,82 +13,101 @@ namespace Abacus.Tokens
             _functionManager = new FunctionManager();
         }
 
-        public List<Token> Lex(string expression, bool isRpn)
+        public List<IToken> Lex(string expression, bool isRpn)
         {
-            List<Token> tokens = new List<Token>();
+            List<IToken> tokens = new List<IToken>();
 
             int i = 0;
+            int currentSign = 1;
             while (i < expression.Length)
             {
                 char token = expression[i];
-                if (Operators.Contains(token))
+                if (token != ' ')
                 {
-                    tokens.Add(new TokenOperator(token));
-                }
-                else switch (token)
-                {
-                    case ',':
-                        tokens.Add(new TokenSeparator());
-                        break;
-                    case '(':
-                        tokens.Add(new TokenLParenthesis());
-                        break;
-                    case ')':
-                        tokens.Add(new TokenRParenthesis());
-                        break;
-                    default:
+                    if (Operators.Contains(token))
                     {
-                        if (char.IsLetter(token))
+                        if (!isRpn && token == '-' && (tokens.Count == 0 || tokens.Count >= 2 &&
+                            tokens[^1] is TokenOperator && tokens[^2] is TokenNumber))
+                            currentSign = currentSign == 1 ? -1 : 1;
+                        else
                         {
-                            if (isRpn)
-                                throw new SyntaxErrorException("No function in RPN");
-                            i = AddFunction(expression, i, tokens);
-                            tokens.Add(new TokenEmpty());
+                            tokens.Add(new TokenOperator(token));
                         }
-                        else if (char.IsNumber(token))
-                        {
-                            i = AddNumber(expression, i, tokens);
-                            tokens.Add(new TokenEmpty());
-                        }
-                        break;
                     }
+                    else
+                        switch (token)
+                        {
+                            case ',':
+                                tokens.Add(new TokenSeparator());
+                                break;
+                            case '(':
+                                tokens.Add(new TokenLParenthesis());
+                                break;
+                            case ')':
+                                tokens.Add(new TokenRParenthesis());
+                                break;
+                            case '=':
+                                tokens.Add(new TokenEqual());
+                                break;
+                            default:
+                            {
+                                if (char.IsLetter(token) || token == '_')
+                                {
+                                    string word = ParseWord(expression, ref i);
+                                    ATokenFunction aTokenFunction =
+                                        _functionManager.Functions.Find(function =>
+                                            function.CanonicalName.Equals(word));
+                                    if (aTokenFunction != null)
+                                        tokens.Add(aTokenFunction);
+                                    else
+                                        tokens.Add(new TokenVariable(0, word));
+                                }
+                                else if (char.IsNumber(token))
+                                {
+                                    i = AddNumber(expression, i, tokens, isRpn ? 1 : currentSign);
+                                    currentSign = 1;
+                                }
+
+                                break;
+                            }
+                        }
                 }
+
                 i++;
             }
 
-            tokens.RemoveAll(token => token is TokenEmpty);
-            
             return tokens;
         }
 
-        private int AddFunction(string expression, int i, List<Token> tokens)
+        private string ParseWord(string expression, ref int i)
         {
             string word = expression[i].ToString();
             i++;
-            while (i < expression.Length && !Operators.Contains(expression[i]))
+            while (i < expression.Length && !Operators.Contains(expression[i]) && expression[i] != ' ')
             {
                 word += expression[i];
                 i++;
             }
-            ATokenFunction aTokenFunction = _functionManager.Functions.Find(function => function.CanonicalName.Equals(word));
-            if (aTokenFunction != null)
-                tokens.Add(aTokenFunction);
-            return i-1;
+
+            i--;
+
+            return word;
         }
 
-        private static int AddNumber(string expression, int i, List<Token> tokens)
+        private static int AddNumber(string expression, int i, List<IToken> tokens, int sign)
         {
-            int currentNumber = (int)char.GetNumericValue(expression[i]);
+            int currentNumber = (int) char.GetNumericValue(expression[i]);
             int number = currentNumber;
             i++;
             while (i < expression.Length && char.IsNumber(expression[i]))
             {
-                currentNumber = (int)char.GetNumericValue(expression[i]);
+                currentNumber = (int) char.GetNumericValue(expression[i]);
                 number = number * 10 + currentNumber;
                 i++;
             }
-            tokens.Add(new TokenNumber(number));
-            return i-1;
+
+            tokens.Add(new TokenNumber(number * sign));
+            return i - 1;
         }
 
         private static string Operators => "∗÷/+-%^*";
