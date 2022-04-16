@@ -59,38 +59,44 @@ namespace Abacus
             
             
             Queue<IToken> input = new Queue<IToken>(tokens);
-            Stack<int> output = new Stack<int>();
+            Stack<ATokenValuable> output = new Stack<ATokenValuable>();
             while (input.Count != 0)
             {
                 IToken dequeue = input.Dequeue();
                 if (dequeue is TokenNumber @tokenNumber)
                 {
-                    output.Push(tokenNumber.Value);
+                    output.Push(tokenNumber);
+                }
+                else if (dequeue is TokenVariable @tokenVariable)
+                {
+                    output.Push(tokenVariable);
                 }
                 else if (dequeue is TokenOperator @tokenOperator)
                 {
-                    int rhs = output.Pop();
-                    int lhs = output.Pop();
-                    output.Push(tokenOperator.Compute(lhs,rhs));
+                    int rhs = output.Pop().Value;
+                    ATokenValuable lhs = output.Peek(); //To avoid reference type creation and push
+                    lhs.Value = tokenOperator.Compute(lhs.Value, rhs);
                 }
-                else if (dequeue is ATokenFunction @atokenFunction)
+                else if (dequeue is ATokenFunction @aTokenFunction)
                 {
-                    int param = output.Pop();
-                    switch (atokenFunction)
+                    ATokenValuable buffer = output.Pop(); //To avoid reference type creation 
+                    int param = buffer.Value;
+                    switch (@aTokenFunction)
                     {
                         case TokenFunction<int> @function1:
-                            output.Push(function1.Compute(param));
+                            buffer.Value = function1.Compute(param);
                             break;
                         case TokenFunction<(int, int)> @function2:
-                            output.Push(function2.Compute((output.Pop(),param)));
+                            buffer.Value = function2.Compute((output.Pop().Value, param)); 
                             break;
                     }
+                    output.Push(buffer);
                 }
             }
 
             if (output.Count != 1)
                 throw new SyntaxErrorException("Syntax Error: operator expected");
-            return output.Pop();
+            return output.Pop().Value;
         }
 
         private bool CheckArgs()

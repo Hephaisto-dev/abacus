@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Abacus.Tokens.Functions;
 
 namespace Abacus.Tokens
@@ -46,9 +45,6 @@ namespace Abacus.Tokens
                             case ')':
                                 tokens.Add(new TokenRParenthesis());
                                 break;
-                            case '=':
-                                tokens.Add(new TokenEqual());
-                                break;
                             default:
                             {
                                 if (char.IsLetter(token) || token == '_')
@@ -60,7 +56,15 @@ namespace Abacus.Tokens
                                     if (aTokenFunction != null)
                                         tokens.Add(aTokenFunction);
                                     else
-                                        tokens.Add(new TokenVariable(0, word));
+                                    {
+                                        TokenVariable variable = (TokenVariable) tokens
+                                            .Find(token1 =>
+                                                token1 is TokenVariable @tokenVariable && tokenVariable.Name == word);
+                                        if (variable == null)
+                                            tokens.Add(new TokenVariable(0, word));
+                                        else 
+                                            tokens.Add(variable);
+                                    }
                                 }
                                 else if (char.IsNumber(token))
                                 {
@@ -110,6 +114,6 @@ namespace Abacus.Tokens
             return i - 1;
         }
 
-        private static string Operators => "∗÷/+-%^*";
+        private static string Operators => "∗÷/+-%^*=";
     }
 }

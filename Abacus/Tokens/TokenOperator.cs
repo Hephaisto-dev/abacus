@@ -10,28 +10,30 @@ namespace Abacus.Tokens
 
         protected internal TokenOperator(char value)
         {
-            this.Value = value;
+            Value = value;
             Priority = SetPriority();
         }
 
-        public int Compute(double lhs, double rhs)
+        public int Compute(int lhs, int rhs)
         {
             switch (Value)
             {
                 case '*':
-                case '∗': return (int) (lhs * rhs);
+                case '∗': return lhs * rhs;
                 case '÷':
                 case '/': 
                     if (rhs == 0)
                         throw new DivideByZeroException();
-                    return (int) (lhs / rhs);
-                case '+': return (int) (lhs + rhs);
-                case '-': return (int) (lhs - rhs);
-                case '%': return (int) (lhs % rhs);
+                    return lhs / rhs;
+                case '+': return lhs + rhs;
+                case '-': return lhs - rhs;
+                case '%': return lhs % rhs;
                 case '^':
                     if (lhs == 0 && rhs < 0)
                         throw new DivideByZeroException();
                     return (int) Math.Pow(lhs, rhs);
+                case '=':
+                    return rhs;
             }
             return 0;
         }
