@@ -16,7 +16,7 @@ namespace Abacus.Syntax
             {
                 switch (token)
                 {
-                    case TokenNumber:
+                    case ATokenValuable:
                         output.Add(token);
                         break;
                     case ATokenFunction:

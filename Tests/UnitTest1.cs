@@ -49,6 +49,7 @@ namespace Tests
         [TestCase("-1 * 2", -2,0)]
         [TestCase("isprime (max (2 ,3))", 1,0)]
         [TestCase("--1", 1,0)]
+        [TestCase("a = b = 2", 2,0)]
         public void TestNormal(string expression, int expectedResult, int expectedReturn)
         {
             try 
