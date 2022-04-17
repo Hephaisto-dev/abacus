@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Abacus.Tokens.Functions;
 
 namespace Abacus.Tokens
@@ -12,75 +13,91 @@ namespace Abacus.Tokens
             _functionManager = new FunctionManager();
         }
 
-        public List<IToken> Lex(string expression, bool isRpn)
+        public (List<List<IToken>>, List<TokenVariable>) Lex(string expression, bool isRpn)
         {
-            List<IToken> tokens = new List<IToken>();
+            List<List<IToken>> tokensExpressions = new();
+            string[] split = expression.Split(";");
+            List<TokenVariable> variables = new List<TokenVariable>();
 
-            int i = 0;
-            int currentSign = 1;
-            while (i < expression.Length)
+            foreach (string subExpression in split)
             {
-                char token = expression[i];
-                if (token != ' ')
+                List<IToken> tokens = new List<IToken>();
+                int i = 0;
+                int currentSign = 1;
+                while (i < subExpression.Length)
                 {
-                    if (Operators.Contains(token))
+                    char token = subExpression[i];
+                    if (token != ' ')
                     {
-                        if (!isRpn && token == '-' && (tokens.Count == 0 || tokens.Count >= 2 &&
-                            tokens[^1] is TokenOperator && tokens[^2] is TokenNumber))
-                            currentSign = currentSign == 1 ? -1 : 1;
-                        else
+                        if (Operators.Contains(token))
                         {
-                            tokens.Add(new TokenOperator(token));
-                        }
-                    }
-                    else
-                        switch (token)
-                        {
-                            case ',':
-                                tokens.Add(new TokenSeparator());
-                                break;
-                            case '(':
-                                tokens.Add(new TokenLParenthesis());
-                                break;
-                            case ')':
-                                tokens.Add(new TokenRParenthesis());
-                                break;
-                            default:
+                            if (!isRpn && token == '-' && (tokens.Count == 0 || tokens.Count >= 2 &&
+                                tokens[^1] is TokenOperator && tokens[^2] is TokenNumber))
+                                currentSign = currentSign == 1 ? -1 : 1;
+                            else
                             {
-                                if (char.IsLetter(token) || token == '_')
-                                {
-                                    string word = ParseWord(expression, ref i);
-                                    ATokenFunction aTokenFunction =
-                                        _functionManager.Functions.Find(function =>
-                                            function.CanonicalName.Equals(word));
-                                    if (aTokenFunction != null)
-                                        tokens.Add(aTokenFunction);
-                                    else
-                                    {
-                                        TokenVariable variable = (TokenVariable) tokens
-                                            .Find(token1 =>
-                                                token1 is TokenVariable @tokenVariable && tokenVariable.Name == word);
-                                        if (variable == null)
-                                            tokens.Add(new TokenVariable(0, word));
-                                        else 
-                                            tokens.Add(variable);
-                                    }
-                                }
-                                else if (char.IsNumber(token))
-                                {
-                                    i = AddNumber(expression, i, tokens, isRpn ? 1 : currentSign);
-                                    currentSign = 1;
-                                }
-
-                                break;
+                                tokens.Add(new TokenOperator(token));
                             }
                         }
+                        else
+                            switch (token)
+                            {
+                                case ',':
+                                    tokens.Add(new TokenSeparator());
+                                    break;
+                                case '(':
+                                    if (!isRpn && tokens.Count > 0 && tokens.Last() is ATokenValuable)
+                                        tokens.Add(new TokenOperator('*')); // implicit multiplication
+                                    tokens.Add(new TokenLParenthesis());
+                                    break;
+                                case ')':
+                                    tokens.Add(new TokenRParenthesis());
+                                    break;
+                                default:
+                                {
+                                    if (char.IsLetter(token) || token == '_')
+                                    {
+                                        string word = ParseWord(subExpression, ref i);
+                                        ATokenFunction aTokenFunction =
+                                            _functionManager.Functions.Find(function =>
+                                                function.CanonicalName.Equals(word));
+                                        if (aTokenFunction != null)
+                                            tokens.Add(aTokenFunction);
+                                        else
+                                        {
+                                            if (!isRpn && tokens.Count > 0 && tokens.Last() is ATokenValuable)
+                                                tokens.Add(new TokenOperator('*')); // implicit multiplication
+
+                                            TokenVariable variable = variables.Find(tokenVariable =>
+                                                tokenVariable.Name == word);
+                                            if (variable == null)
+                                            {
+                                                TokenVariable tokenVariable = new TokenVariable(0, word);
+                                                tokens.Add(tokenVariable);
+                                                variables.Add(tokenVariable);
+                                            }
+                                            else
+                                                tokens.Add(variable);
+                                        }
+                                    }
+                                    else if (char.IsNumber(token))
+                                    {
+                                        i = AddNumber(subExpression, i, tokens, isRpn ? 1 : currentSign);
+                                        currentSign = 1;
+                                    }
+
+                                    break;
+                                }
+                            }
+                    }
+
+                    i++;
                 }
 
-                i++;
+                tokensExpressions.Add(tokens);
             }
 
-            return tokens;
+            return (tokensExpressions,variables);
         }
 
         private string ParseWord(string expression, ref int i)

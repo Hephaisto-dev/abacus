@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Abacus.Tokens;
-using Abacus.Tokens.Functions;
 
 namespace Abacus.Syntax
 {

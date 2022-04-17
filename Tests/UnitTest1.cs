@@ -27,6 +27,7 @@ namespace Tests
         [TestCase("2 0 /", 0,3)]
         [TestCase("2 2 ^", 4,0)]
         [TestCase("2 3 max isprime", 1,0)]
+        [TestCase("a b 2 = =", 2,0)]
         public void TestRpn(string expression, int expectedResult, int expectedReturn)
         {
             try
@@ -50,6 +51,9 @@ namespace Tests
         [TestCase("isprime (max (2 ,3))", 1,0)]
         [TestCase("--1", 1,0)]
         [TestCase("a = b = 2", 2,0)]
+        [TestCase("a = 2(3 +4); b = 5 + 2a; b = a * b; b / 2", 231,0)]
+        [TestCase("a = b = 2; a b", 4,0)]
+        [TestCase("-2 ^ 2", 4,0)]
         public void TestNormal(string expression, int expectedResult, int expectedReturn)
         {
             try 

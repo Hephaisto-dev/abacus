@@ -31,12 +31,12 @@ namespace Abacus
                 Console.WriteLine(Calculate(expression));
                 return 0;
             }
-            catch (ArithmeticException exception)  //TODO check for errors
+            catch (ArithmeticException exception)
             {
                 Console.Error.WriteLine(exception.Message);
                 return 3;
             }
-            catch (SyntaxErrorException  exception)  //TODO check for errors
+            catch (SyntaxErrorException  exception) 
             {
                 Console.Error.WriteLine(exception.Message);
                 return 2;
@@ -51,46 +51,45 @@ namespace Abacus
         public int Calculate(string expression)
         {
             Lexer lexer = new ();
-            List<IToken> tokens = lexer.Lex(expression, _isRpn);
-
-            if (!_isRpn)
-                tokens = Syntaxer.ShuntingYard(tokens);
-
+            (List<List<IToken>> tokensExpressions, List<TokenVariable> variables) = lexer.Lex(expression, _isRpn);
             
-            
-            Queue<IToken> input = new Queue<IToken>(tokens);
             Stack<ATokenValuable> output = new Stack<ATokenValuable>();
-            while (input.Count != 0)
+            foreach (List<IToken> tokens in tokensExpressions)
             {
-                IToken dequeue = input.Dequeue();
-                if (dequeue is TokenNumber @tokenNumber)
+                output.Clear();
+                Queue<IToken> currentExpression = new Queue<IToken>(_isRpn ? tokens : Syntaxer.ShuntingYard(tokens));
+                while (currentExpression.Count != 0)
                 {
-                    output.Push(tokenNumber);
-                }
-                else if (dequeue is TokenVariable @tokenVariable)
-                {
-                    output.Push(tokenVariable);
-                }
-                else if (dequeue is TokenOperator @tokenOperator)
-                {
-                    int rhs = output.Pop().Value;
-                    ATokenValuable lhs = output.Peek(); //To avoid reference type creation and push
-                    lhs.Value = tokenOperator.Compute(lhs.Value, rhs);
-                }
-                else if (dequeue is ATokenFunction @aTokenFunction)
-                {
-                    ATokenValuable buffer = output.Pop(); //To avoid reference type creation 
-                    int param = buffer.Value;
-                    switch (@aTokenFunction)
+                    IToken dequeue = currentExpression.Dequeue();
+                    if (dequeue is TokenNumber @tokenNumber)
                     {
-                        case TokenFunction<int> @function1:
-                            buffer.Value = function1.Compute(param);
-                            break;
-                        case TokenFunction<(int, int)> @function2:
-                            buffer.Value = function2.Compute((output.Pop().Value, param)); 
-                            break;
+                        output.Push(tokenNumber);
                     }
-                    output.Push(buffer);
+                    else if (dequeue is TokenVariable @tokenVariable)
+                    {
+                        output.Push(tokenVariable);
+                    }
+                    else if (dequeue is TokenOperator @tokenOperator)
+                    {
+                        int rhs = output.Pop().Value;
+                        ATokenValuable lhs = output.Peek(); //To avoid reference type creation and push
+                        lhs.Value = tokenOperator.Compute(lhs.Value, rhs);
+                    }
+                    else if (dequeue is ATokenFunction @aTokenFunction)
+                    {
+                        ATokenValuable buffer = output.Pop(); //To avoid reference type creation 
+                        int param = buffer.Value;
+                        switch (@aTokenFunction)
+                        {
+                            case TokenFunction<int> @function1:
+                                buffer.Value = function1.Compute(param);
+                                break;
+                            case TokenFunction<(int, int)> @function2:
+                                buffer.Value = function2.Compute((output.Pop().Value, param)); 
+                                break;
+                        }
+                        output.Push(buffer);
+                    }
                 }
             }
 
