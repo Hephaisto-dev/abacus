@@ -17,7 +17,7 @@ namespace Abacus.Tokens
         public List<List<IToken>> Lex(string expression, bool isRpn)
         {
             List<List<IToken>> tokensExpressions = new();
-            string[] split = expression.Split(';', StringSplitOptions.TrimEntries);
+            string[] split = expression.Split(';');
             List<TokenVariable> variables = new List<TokenVariable>();
 
             foreach (string subExpression in split)
