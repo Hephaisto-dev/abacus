@@ -53,6 +53,8 @@ namespace Tests
         [TestCase("a = b = 2", 2,0)]
         [TestCase("a = 2(3 +4); b = 5 + 2a; b = a * b; b / 2", 231,0)]
         [TestCase("a = b = 2; a b", 4,0)]
+        [TestCase("a = b = 2; a b;", 4,0)]
+        [TestCase("a = b = 2; a b;   ;    ;    ;", 4,0)]
         [TestCase("-2 ^ 2", 4,0)]
         public void TestNormal(string expression, int expectedResult, int expectedReturn)
         {

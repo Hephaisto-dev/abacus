@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Abacus.Tokens.Functions;
@@ -13,10 +14,10 @@ namespace Abacus.Tokens
             _functionManager = new FunctionManager();
         }
 
-        public (List<List<IToken>>, List<TokenVariable>) Lex(string expression, bool isRpn)
+        public List<List<IToken>> Lex(string expression, bool isRpn)
         {
             List<List<IToken>> tokensExpressions = new();
-            string[] split = expression.Split(";");
+            string[] split = expression.Split(';', StringSplitOptions.TrimEntries);
             List<TokenVariable> variables = new List<TokenVariable>();
 
             foreach (string subExpression in split)
@@ -93,11 +94,12 @@ namespace Abacus.Tokens
 
                     i++;
                 }
-
-                tokensExpressions.Add(tokens);
+                
+                if (tokens.Count > 0)
+                    tokensExpressions.Add(tokens);
             }
 
-            return (tokensExpressions,variables);
+            return tokensExpressions;
         }
 
         private string ParseWord(string expression, ref int i)

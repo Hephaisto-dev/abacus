@@ -51,7 +51,7 @@ namespace Abacus
         public int Calculate(string expression)
         {
             Lexer lexer = new ();
-            (List<List<IToken>> tokensExpressions, List<TokenVariable> variables) = lexer.Lex(expression, _isRpn);
+            List<List<IToken>> tokensExpressions = lexer.Lex(expression, _isRpn);
             
             Stack<ATokenValuable> output = new Stack<ATokenValuable>();
             foreach (List<IToken> tokens in tokensExpressions)
